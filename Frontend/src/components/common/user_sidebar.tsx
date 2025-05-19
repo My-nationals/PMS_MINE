@@ -14,16 +14,21 @@ import {
 import { NavUser } from './nav-user';
 import { NavMain } from './nav-main';
 const userNavItems = [
-  {
-    title: 'Dashboard',
-    url: '/user',
-    icon: BookOpenIcon,
-  },
-  {
-    title: 'Slots',
-    url: '/user/slots',
-    icon: ListIcon,
-  },
+    {
+        title: "Dashboard",
+        url: "/user",
+        icon: BookOpenIcon,
+    },
+    {
+        title: "Vehicles",
+        url: "/user/vehicles",
+        icon: ListIcon,
+    },
+    {
+        title: "Requests",
+        url: "/user/requests",
+        icon: ListIcon,
+    },
 ];
 export function UserSidebar({
   ...props
@@ -46,7 +51,7 @@ export function UserSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={userNavItems} quickActionLabel="View Slots" />
+        <NavMain items={userNavItems} quickActionLabel="Create new request" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser

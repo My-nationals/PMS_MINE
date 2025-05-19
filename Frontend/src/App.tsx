@@ -3,12 +3,12 @@ import Login from "./Pages/auth/Login";
 import Register from "./Pages/auth/Register";
 import AdminSlots from "./Pages/admin/AdminSlots";
 import Requests from "./Pages/admin/Request";
-import UserSlots from "./Pages/user/UserSlots";
 import AdminLayout from "./Layout/admin-layout";
 import UserLayout from "./Layout/user-layout";
 import UserDashboard from "./Pages/user/Dashboard";
 import AdminDashboard from "./Pages/admin/AdminDashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import Vehicles from "./Pages/user/Vehicles"
 
 function App() {
     return (
@@ -58,7 +58,28 @@ function App() {
                     </ProtectedRoute>
                 }
             />
+
             <Route
+                path="/user/vehicles"
+                element={
+                    <ProtectedRoute>
+                        <UserLayout>
+                            <Vehicles />
+                        </UserLayout>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/user/requests"
+                element={
+                    <ProtectedRoute>
+                        <UserLayout>
+                            <Requests />
+                        </UserLayout>
+                    </ProtectedRoute>
+                }
+            />
+            {/* <Route
                 path="/user/slots"
                 element={
                     <ProtectedRoute>
@@ -67,10 +88,10 @@ function App() {
                         </UserLayout>
                     </ProtectedRoute>
                 }
-            />
+            /> */}
 
             {/* Redirect root to login */}
-            <Route path="/" element={<Register />} />
+            <Route path="/" element={<Login />} />
         </Routes>
     );
 }

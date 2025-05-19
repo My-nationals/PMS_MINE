@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -22,12 +21,13 @@ import {
 import { useSlotMutations } from "@/hooks/slot";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { getCookie } from "@/utils/cookie";
 
 export type AdminSlot = {
-    occupied: any;
     id: string;
     slotCode: string;
     status: "available" | "occupied";
+    occupied: boolean;
 };
 
 type UserSlot = {
@@ -43,7 +43,7 @@ type Props =
       }
     | {
           role: "user";
-          data: UserSlot[];
+          data: { id: string; code: string; occupied: boolean }[];
           refetch?: () => void;
       };
 
@@ -57,28 +57,30 @@ export function ParkingSlotTable({ role, data, refetch }: Props) {
         null
     );
     const [currentPage, setCurrentPage] = React.useState(1);
-    const [rowsPerPage, setRowsPerPage] = React.useState(5);
-       const [slots, setSlots] = React.useState(data);
-       React.useEffect(() => {
-           if (role === "admin") {
-               const mappedSlots = (data as AdminSlot[]).map((slot) => ({
-                   id: slot.id ?? crypto.randomUUID(), // fallback if missing
-                   slotCode: slot.slotCode,
-                   status: slot.occupied ? "occupied" : "available",
-               }));
-               setSlots(mappedSlots);
-           } else {
-               setSlots(data);
-           }
-       }, [data, role]);
+    const [rowsPerPage] = React.useState(5);
+    const [slots, setSlots] = React.useState<any[]>([]);
+
+    React.useEffect(() => {
+        if (role === "admin") {
+            const mappedSlots = (data as AdminSlot[]).map((slot) => ({
+                id: slot.id,
+                slotCode: slot.slotCode,
+                status: slot.occupied ? "occupied" : "available",
+                occupied: slot.occupied,
+            }));
+            setSlots(mappedSlots);
+        } else {
+            const mappedSlots = (data as any[]).map((slot) => ({
+                id: slot.id,
+                slotCode: slot.code,
+            }));
+            setSlots(mappedSlots);
+        }
+    }, [data, role]);
 
     const filteredData = slots.filter((slot) => {
         const query = search.toLowerCase();
-        return (
-            slot.slotCode.toLowerCase().includes(query) ||
-            (role === "admin" &&
-                (slot as AdminSlot).status.toLowerCase().includes(query))
-        );
+        return slot.slotCode.toLowerCase().includes(query);
     });
 
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -92,18 +94,17 @@ export function ParkingSlotTable({ role, data, refetch }: Props) {
         setEditFormData({ ...slot });
     };
 
-   
     const handleSaveEdit = async () => {
         if (!editFormData) return;
-    
-        const token = localStorage.getItem("auth_token");
+
+        const token = getCookie("auth_token");
         if (!token) {
             toast.error("User not logged in.");
             return;
         }
-    
+
         try {
-            await api.put(
+            await api.patch(
                 `/slots/${editFormData.id}`,
                 {
                     code: editFormData.slotCode,
@@ -116,7 +117,7 @@ export function ParkingSlotTable({ role, data, refetch }: Props) {
                     },
                 }
             );
-    
+
             toast.success("Slot updated successfully");
             setEditingSlotId(null);
             setEditFormData(null);
@@ -126,7 +127,7 @@ export function ParkingSlotTable({ role, data, refetch }: Props) {
             toast.error("Failed to update slot");
         }
     };
-    
+
     const handleDelete = async (slotId: string, slotCode: string) => {
         if (!confirm(`Are you sure you want to delete slot ${slotCode}?`))
             return;
@@ -139,8 +140,6 @@ export function ParkingSlotTable({ role, data, refetch }: Props) {
             toast.error("Failed to delete slot");
         }
     };
- 
-
 
     return (
         <div className="w-full max-w-6xl mx-auto px-4 py-6 space-y-6">
@@ -150,9 +149,7 @@ export function ParkingSlotTable({ role, data, refetch }: Props) {
 
             <div className="flex justify-center">
                 <Input
-                    placeholder={`Search by ${
-                        role === "admin" ? "code or status" : "code"
-                    }...`}
+                    placeholder={`Search by slot code...`}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full max-w-md"
@@ -175,10 +172,7 @@ export function ParkingSlotTable({ role, data, refetch }: Props) {
                     <TableBody>
                         {paginatedData.length > 0 ? (
                             paginatedData.map((slot) => (
-                                <TableRow
-                                    key={slot.id}
-                                    className="hover:bg-gray-50"
-                                >
+                                <TableRow key={slot.id}>
                                     <TableCell>
                                         {editingSlotId === slot.id ? (
                                             <Input
@@ -238,14 +232,13 @@ export function ParkingSlotTable({ role, data, refetch }: Props) {
                                                 <Badge
                                                     variant="outline"
                                                     className={`px-2 py-1 rounded-full text-sm ${
-                                                        (slot as AdminSlot)
-                                                            .status ===
+                                                        slot.status ===
                                                         "available"
                                                             ? "text-green-600 border-green-500"
                                                             : "text-red-600 border-red-500"
                                                     }`}
                                                 >
-                                                    {(slot as AdminSlot).status}
+                                                    {slot.status}
                                                 </Badge>
                                             )}
                                         </TableCell>
@@ -283,7 +276,7 @@ export function ParkingSlotTable({ role, data, refetch }: Props) {
                                                         variant="outline"
                                                         onClick={() =>
                                                             handleEditClick(
-                                                                slot as AdminSlot
+                                                                slot
                                                             )
                                                         }
                                                     >
@@ -312,60 +305,15 @@ export function ParkingSlotTable({ role, data, refetch }: Props) {
                         ) : (
                             <TableRow>
                                 <TableCell
-                                    colSpan={role === "admin" ? 3 : 1}
-                                    className="text-center text-gray-500"
+                                    colSpan={3}
+                                    className="text-center py-4"
                                 >
-                                    No results found.
+                                    No data found.
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
-            </div>
-
-            <div className="flex justify-between items-center mt-4">
-                <div className="flex items-center gap-2">
-                    <label className="text-sm">Rows per page:</label>
-                    <select
-                        className="border rounded px-2 py-1 text-sm"
-                        value={rowsPerPage}
-                        onChange={(e) => {
-                            setRowsPerPage(Number(e.target.value));
-                            setCurrentPage(1);
-                        }}
-                    >
-                        {[5, 20, 30, 50].map((num) => (
-                            <option key={num} value={num}>
-                                {num}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="text-sm text-gray-600">
-                    Page {currentPage} of {totalPages}
-                </div>
-                <div className="space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                            setCurrentPage((p) => Math.max(1, p - 1))
-                        }
-                        disabled={currentPage === 1}
-                    >
-                        Previous
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                            setCurrentPage((p) => Math.min(totalPages, p + 1))
-                        }
-                        disabled={currentPage === totalPages}
-                    >
-                        Next
-                    </Button>
-                </div>
             </div>
         </div>
     );

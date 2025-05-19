@@ -66,7 +66,7 @@ export const useSlotMutations = () => {
     const availableSlotsQuery = useQuery({
         queryKey: ["available-slots"],
         queryFn: async () => {
-            const res = await api.get("/requests/available");
+            const res = await api.get("/slots/available");
             return res.data.slots;
         },
     });

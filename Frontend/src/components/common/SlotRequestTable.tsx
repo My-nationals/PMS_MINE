@@ -1,3 +1,5 @@
+"use client";
+
 import {
     Table,
     TableBody,
@@ -9,12 +11,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { useSlotRequestActions } from "@/hooks/use-slot-request";
 import { useState } from "react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/components/ui/dialog";
 
 type SlotRequest = {
     id: string;
     status: "PENDING" | "APPROVED" | "DENIED";
     user: { names: string };
-    slot: { code: string };
+    slot: { code: string } | null;
+    vehicle?: { plate: string } | null;
 };
 
 type Props = {
@@ -22,20 +32,31 @@ type Props = {
 };
 
 export function SlotRequestTable({ data }: Props) {
-    const { approveRequest, rejectRequest, isApproving, isRejecting } =
-        useSlotRequestActions();
+    const { approveRequest, rejectRequest } = useSlotRequestActions();
+
     const [updatedStatuses, setUpdatedStatuses] = useState<
         Record<string, "APPROVED" | "DENIED" | "PENDING">
     >({});
+    const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({});
+    const [confirmation, setConfirmation] = useState<{
+        id: string;
+        action: "approve" | "reject";
+    } | null>(null);
 
-    const handleApprove = async (id: string) => {
-        await approveRequest(id);
-        setUpdatedStatuses((prev) => ({ ...prev, [id]: "APPROVED" }));
-    };
-
-    const handleReject = async (id: string) => {
-        await rejectRequest(id);
-        setUpdatedStatuses((prev) => ({ ...prev, [id]: "DENIED" }));
+    const handleAction = async (id: string, action: "approve" | "reject") => {
+        setLoadingIds((prev) => ({ ...prev, [id]: true }));
+        try {
+            if (action === "approve") {
+                await approveRequest(id);
+                setUpdatedStatuses((prev) => ({ ...prev, [id]: "APPROVED" }));
+            } else {
+                await rejectRequest(id);
+                setUpdatedStatuses((prev) => ({ ...prev, [id]: "DENIED" }));
+            }
+        } finally {
+            setLoadingIds((prev) => ({ ...prev, [id]: false }));
+            setConfirmation(null);
+        }
     };
 
     const getEffectiveStatus = (request: SlotRequest) => {
@@ -58,6 +79,9 @@ export function SlotRequestTable({ data }: Props) {
                                 Slot Code
                             </TableHead>
                             <TableHead className="p-4 font-semibold text-gray-700">
+                                Vehicle Plate
+                            </TableHead>
+                            <TableHead className="p-4 font-semibold text-gray-700">
                                 Status
                             </TableHead>
                             <TableHead className="p-4 font-semibold text-right text-gray-700">
@@ -69,6 +93,7 @@ export function SlotRequestTable({ data }: Props) {
                         {data.length > 0 ? (
                             data.map((request) => {
                                 const status = getEffectiveStatus(request);
+                                const isLoading = loadingIds[request.id];
 
                                 return (
                                     <TableRow
@@ -79,7 +104,18 @@ export function SlotRequestTable({ data }: Props) {
                                             {request.user.names}
                                         </TableCell>
                                         <TableCell className="p-4">
-                                            {request.slot.code}
+                                            {request.slot?.code || (
+                                                <span className="text-gray-400 italic">
+                                                    No slot
+                                                </span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="p-4">
+                                            {request.vehicle?.plate || (
+                                                <span className="text-gray-400 italic">
+                                                    No vehicle
+                                                </span>
+                                            )}
                                         </TableCell>
                                         <TableCell className="p-4">
                                             {status === "APPROVED" ? (
@@ -103,31 +139,39 @@ export function SlotRequestTable({ data }: Props) {
                                                         size="sm"
                                                         variant="outline"
                                                         onClick={() =>
-                                                            handleApprove(
-                                                                request.id
-                                                            )
+                                                            setConfirmation({
+                                                                id: request.id,
+                                                                action: "approve",
+                                                            })
                                                         }
-                                                        disabled={
-                                                            isApproving ||
-                                                            isRejecting
-                                                        }
+                                                        disabled={isLoading}
                                                     >
-                                                        Approve
+                                                        {isLoading &&
+                                                        confirmation?.action ===
+                                                            "approve" &&
+                                                        confirmation?.id ===
+                                                            request.id
+                                                            ? "Approving..."
+                                                            : "Approve"}
                                                     </Button>
                                                     <Button
                                                         size="sm"
                                                         variant="destructive"
                                                         onClick={() =>
-                                                            handleReject(
-                                                                request.id
-                                                            )
+                                                            setConfirmation({
+                                                                id: request.id,
+                                                                action: "reject",
+                                                            })
                                                         }
-                                                        disabled={
-                                                            isApproving ||
-                                                            isRejecting
-                                                        }
+                                                        disabled={isLoading}
                                                     >
-                                                        Reject
+                                                        {isLoading &&
+                                                        confirmation?.action ===
+                                                            "reject" &&
+                                                        confirmation?.id ===
+                                                            request.id
+                                                            ? "Rejecting..."
+                                                            : "Reject"}
                                                     </Button>
                                                 </>
                                             ) : (
@@ -142,7 +186,7 @@ export function SlotRequestTable({ data }: Props) {
                         ) : (
                             <TableRow>
                                 <TableCell
-                                    colSpan={4}
+                                    colSpan={5}
                                     className="p-4 text-center text-gray-500"
                                 >
                                     No requests found.
@@ -152,6 +196,51 @@ export function SlotRequestTable({ data }: Props) {
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Confirmation Dialog */}
+            {confirmation && (
+                <Dialog open={true} onOpenChange={() => setConfirmation(null)}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>
+                                {confirmation.action === "approve"
+                                    ? "Approve Request"
+                                    : "Reject Request"}
+                            </DialogTitle>
+                        </DialogHeader>
+                        <p className="text-gray-600">
+                            Are you sure you want to{" "}
+                            <span className="font-semibold">
+                                {confirmation.action}
+                            </span>{" "}
+                            this request?
+                        </p>
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                onClick={() => setConfirmation(null)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant={
+                                    confirmation.action === "reject"
+                                        ? "destructive"
+                                        : "default"
+                                }
+                                onClick={() =>
+                                    handleAction(
+                                        confirmation.id,
+                                        confirmation.action
+                                    )
+                                }
+                            >
+                                Confirm
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     );
 }

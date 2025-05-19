@@ -22,8 +22,8 @@ export function AuthForm({
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-      const data = Object.fromEntries(formData.entries());
-      
+        const data = Object.fromEntries(formData.entries());
+
         if (isRegister) {
             await register({
                 names: data.name as string,
@@ -31,7 +31,7 @@ export function AuthForm({
                 telephone: data.phone as string,
                 password: data.password as string,
             });
-          console.log(data);
+            console.log(data);
         } else {
             await login({
                 email: data.email as string,

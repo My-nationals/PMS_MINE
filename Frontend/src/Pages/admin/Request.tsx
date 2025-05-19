@@ -4,9 +4,9 @@ import { SlotRequestTable } from "@/components/common/SlotRequestTable";
 
 export default function RequestPage() {
     const { data, isLoading, error } = useQuery({
-        queryKey: ["slot-requests"],
+        queryKey: ["parking-requests"],
         queryFn: async () => {
-            const res = await api.get("/requests");
+            const res = await api.get("/requests/my-requests");
             return res.data.requests;
         },
     });
