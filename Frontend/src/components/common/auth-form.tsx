@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import parking from "../../../public/assets/parking.png"
 interface LoginFormProps extends React.ComponentProps<"div"> {
     type: "login" | "register";
 }
@@ -172,7 +173,7 @@ export function AuthForm({
                     </form>
                     <div className="relative hidden bg-muted md:block">
                         <img
-                            src="/parking.png"
+                            src={parking}
                             alt="Image"
                             className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
                         />

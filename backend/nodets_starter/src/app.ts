@@ -5,6 +5,7 @@ import express from "express";
 import http from "http";
 import swaggerUi from "swagger-ui-express";
 import swaggerFile from "./swagger/doc/swagger.json";
+import MyJson from "./swagger/swagger.json"
 import ServerResponse from "./utils/ServerResponse";
 import router from "./routes";
 
@@ -21,6 +22,9 @@ app.disable("x-powered-by");
 
 // Swagger docs
 // app.use("/api/v1/docs", swaggerUi.serve as RequestHandler, swaggerUi.setup(swaggerFile));
+
+//@ts-expect-error
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(MyJson))
 
 // ✅ App routes (must come before catch-all)
 app.use("/api/v1", router);

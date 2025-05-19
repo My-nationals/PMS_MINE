@@ -1,0 +1,603 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Information Management system",
+        "description": "API Documentation for the system",
+        "contact": {
+            "name": "Mike Nzabera",
+            "email": "nzaberamikepeter@gmail.com"
+        },
+        "version": "1.0.0",
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "servers": [
+        {
+            "url": "http://localhost:8000/api/v1"
+        }
+    ],
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "summary": "Log in as user",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "email",
+                                    "password"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "summary": "Register new User",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created Successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            }
+        },
+        "/vehicles": {
+            "post": {
+                "summary": "Register Your Vehicle",
+                "tags": [
+                    "Vehicle"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Vehicles"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully registered vehicle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vehicles"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/vehicles/user": {
+            "get": {
+                "summary": "Get All User Vehicles",
+                "tags": [
+                    "Vehicle"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Vehicles"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/vehicles/{plateNumber}": {
+            "get": {
+                "summary": "Get All Vehicles By Plate",
+                "tags": [
+                    "Vehicle"
+                ],
+                "parameters": [
+                    {
+                        "name": "plateNumber",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vehicles"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/parking-lots": {
+            "post": {
+                "summary": "Create Parking Slot (Admin only)",
+                "tags": [
+                    "Parking Lot"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ParkingLot"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully created parking lost",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ParkingLot"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "summary": "Get All Parking Lots (Admin only)",
+                "tags": [
+                    "Parking Lot"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ParkingLot"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/parking-lots/{id}": {
+            "patch": {
+                "summary": "Update Parking Lot (Admin only)",
+                "tags": [
+                    "Parking Lot"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ParkingLot"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ParkingLot"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete Parking Lot (Admin only)",
+                "tags": [
+                    "Parking Lot"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Deleted"
+                    },
+                    "401": {
+                        "description": "Not Authorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/parking-lots/{id}/occupancy": {
+            "get": {
+                "summary": "Get current occupancy of parking lot (Admin only)",
+                "tags": [
+                    "Parking Lot"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Operation"
+                    },
+                    "401": {
+                        "description": "Not Authorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/parking-records/check-in": {
+            "post": {
+                "summary": "Check in your vehicle",
+                "tags": [
+                    "Parking Records"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckIn"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Operation"
+                    },
+                    "401": {
+                        "description": "Not Authorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/parking-records/check-out": {
+            "post": {
+                "summary": "Check out your vehicle",
+                "tags": [
+                    "Parking Records"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckOut"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Operation"
+                    },
+                    "401": {
+                        "description": "Not Authorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/parking-records/history/{plateNumber}": {
+            "get": {
+                "summary": "Get Parking history of vehicle",
+                "tags": [
+                    "Parking Records"
+                ],
+                "parameters": [
+                    {
+                        "name": "plateNumber",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "History retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Vehicle not found"
+                    }
+                }
+            }
+        },
+        "/parking-records/search": {
+            "get": {
+                "summary": "Search parking records (Admin only)",
+                "tags": [
+                    "Parking Records"
+                ],
+                "parameters": [
+                    {
+                        "name": "plateNumber",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "nationalId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "parkingLotId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Records found"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "in": "header"
+            }
+        },
+        "schemas": {
+            "Users": {
+                "type": "object",
+                "properties": {
+                    "firstName": {
+                        "type": "string"
+                    },
+                    "lastName": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UserResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "firstName": {
+                        "type": "string"
+                    },
+                    "lastName": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    }
+                }
+            },
+            "AuthResponse": {
+                "type": "object",
+                "properties": {
+                    "accessToken": {
+                        "type": "string"
+                    },
+                    "tokenType": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Vehicles": {
+                "type": "object",
+                "properties": {
+                    "plateNumber": {
+                        "type": "string"
+                    },
+                    "manufacturer": {
+                        "type": "string"
+                    },
+                    "model": {
+                        "type": "string"
+                    },
+                    "color": {
+                        "type": "string"
+                    }
+                },
+                "example": {
+                    "plateNumber": "RAA003C",
+                    "manufacturer": "Toyota",
+                    "model": "RAV4",
+                    "color": "Black"
+                }
+            },
+            "ParkingLot": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "location": {
+                        "type": "string"
+                    },
+                    "capacity": {
+                        "type": "number"
+                    },
+                    "hourlyRate": {
+                        "type": "number"
+                    }
+                },
+                "example": {
+                    "name": "Kigali City Tower Lot",
+                    "location": "Downtown Kigali - KCT",
+                    "capacity": 50,
+                    "hourlyRate": 1000
+                }
+            },
+            "CheckIn": {
+                "type": "object",
+                "properties": {
+                    "plateNumber": {
+                        "type": "string"
+                    },
+                    "parkingLotId": {
+                        "type": "string"
+                    }
+                },
+                "example": {
+                    "plateNumber": "RAA003C",
+                    "parkingLotId": "3864741a-9e34-493d-9352-794ee9fc99e4"
+                }
+            },
+            "CheckOut": {
+                "type": "object",
+                "properties": {
+                    "plateNumber": {
+                        "type": "string"
+                    }
+                },
+                "example": {
+                    "plateNumber": "RAA003C"
+                }
+            }
+        }
+    }
+}
