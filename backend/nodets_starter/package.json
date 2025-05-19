@@ -5,7 +5,7 @@
     "main": "app.ts",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "dev": "nodemon --exec ts-node src/swagger/index.ts  --ignore src/swagger/doc/swagger.json",
+        "dev": "nodemon --exec ts-node src/app.ts  --ignore src/swagger/doc/swagger.json",
         "start": "ts-node src/app.ts",
         "build": "tsc",
         "serve": "npx ts-node src/swagger/index.ts",
@@ -15,7 +15,8 @@
         "prisma:all": "yarn prisma:migrate && yarn prisma:gen",
         "prisma:seed": "ts-node prisma/seed.ts",
         "docker:build": "docker build -t uleslie/ne-nodejs .",
-        "docker:run": "docker run -p 4002:4002 uleslie/ne-nodejs"
+        "docker:run": "docker run -p 4002:4002 uleslie/ne-nodejs",
+        "swagger": "node ./src/swagger/index.ts"
     },
     "author": "uleslie",
     "license": "MIT",
@@ -45,12 +46,12 @@
         "@types/jsonwebtoken": "^9.0.1",
         "@types/node": "^22.15.2",
         "@types/nodemailer": "^6.4.7",
-        "@types/swagger-jsdoc": "^6.0.1",
-        "@types/swagger-ui-express": "^4.1.3",
+        "@types/swagger-jsdoc": "^6.0.4",
+        "@types/swagger-ui-express": "^4.1.8",
         "@types/uuid": "^9.0.2",
         "prisma": "^5.22.0",
         "swagger-jsdoc": "^6.2.8",
-        "swagger-ui-express": "^5.0.0",
+        "swagger-ui-express": "^5.0.1",
         "ts-node": "^10.9.2"
     }
 }

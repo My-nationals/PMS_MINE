@@ -44,13 +44,31 @@ CREATE TABLE "slots" (
 );
 
 -- CreateTable
-CREATE TABLE "parking_requests" (
+CREATE TABLE "ParkingRequest" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "status" "RequestStatus" NOT NULL DEFAULT 'PENDING',
+    "vehicleId" TEXT NOT NULL,
+    "slotId" TEXT,
+    "status" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "entryTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "exitTime" TIMESTAMP(3),
 
-    CONSTRAINT "parking_requests_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ParkingRequest_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "vehicles" (
+    "id" TEXT NOT NULL,
+    "plate" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "color" TEXT,
+    "model" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "vehicles_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -65,8 +83,20 @@ CREATE UNIQUE INDEX "users_assignedSlotId_key" ON "users"("assignedSlotId");
 -- CreateIndex
 CREATE UNIQUE INDEX "slots_code_key" ON "slots"("code");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "vehicles_plate_key" ON "vehicles"("plate");
+
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_assignedSlotId_fkey" FOREIGN KEY ("assignedSlotId") REFERENCES "slots"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "parking_requests" ADD CONSTRAINT "parking_requests_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ParkingRequest" ADD CONSTRAINT "ParkingRequest_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ParkingRequest" ADD CONSTRAINT "ParkingRequest_vehicleId_fkey" FOREIGN KEY ("vehicleId") REFERENCES "vehicles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ParkingRequest" ADD CONSTRAINT "ParkingRequest_slotId_fkey" FOREIGN KEY ("slotId") REFERENCES "slots"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "vehicles" ADD CONSTRAINT "vehicles_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

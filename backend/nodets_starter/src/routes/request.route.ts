@@ -1,26 +1,35 @@
 // routes/slot.routes.ts
 import express, { RequestHandler } from "express";
-import  requestController  from "../controllers/request.controller";
+import parkingRequestController from "../controllers/request.controller";
 import { checkAdmin, checkLoggedIn } from "../middlewares/auth.middleware";
 // import slotRequestsController from "../controllers/request.controller";
 const requestRouter = express.Router();
 
 requestRouter.use(checkLoggedIn);
 requestRouter.post(
-    "/request/:slotId",
-    requestController.requestSlotHandler
+    "/request/:vehicleId",
+    parkingRequestController.createParkingRequestHandler
 );
+requestRouter.get(
+    "/my-requests",
+    parkingRequestController.getMyRequestsHandler as unknown as RequestHandler
+);
+
 
 requestRouter.use(checkAdmin);
-
-// Admin Slot Routes
-
-requestRouter.patch("/request/:requestId/accept", requestController.acceptRequestHandler);
+requestRouter.patch(
+    "/request/:requestId/accept",
+    parkingRequestController.acceptRequestHandler
+);
 requestRouter.get(
     "/",
-    requestController.getAllRequestsHandler as unknown as RequestHandler
+    parkingRequestController.getAllRequestsHandler as unknown as RequestHandler
 );
-requestRouter.patch("/request/:requestId/reject", requestController.rejectRequestHandler);
+requestRouter.patch(
+    "/request/:requestId/reject",
+    parkingRequestController.rejectRequestHandler
+);
+
 
 
 

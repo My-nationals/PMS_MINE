@@ -1,28 +1,34 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 enum Role {
   ADMIN
   USER
 }
+
 enum VerificationStatus {
   VERIFIED
   PENDING
   UNVERIFIED
 }
+
 enum PasswordResetStatus {
   PENDING
   IDLE
 }
+
 enum RequestStatus {
   PENDING
   APPROVED
   DENIED
 }
+
 model User {
   id                   String              @id @default(uuid())
   names                String
@@ -39,22 +45,22 @@ model User {
   passwordResetExpires DateTime?           @map("password_reset_expires")
   createdAt            DateTime            @default(now()) @map("created_at")
   updatedAt            DateTime            @updatedAt @map("updated_at")
-  assignedSlotId       String?                @unique
+  assignedSlotId       String?             @unique
   assignedSlot         Slot?               @relation("UserAssignedSlot", fields: [assignedSlotId], references: [id])
-  parkingRequests      ParkingRequest[]
 
-  // Removed conflicting line
-  // slot Slot? @relation("UserAssignedSlot")
+  parkingRequests ParkingRequest[]
+  vehicles        Vehicle[] // ✅ <-- Added this line
 
   @@map("users")
 }
+
 model Slot {
-  id          String           @id @default(uuid())
-  code        String           @unique
-  occupied    Boolean?         @default(false)
+  id          String   @id @default(uuid())
+  code        String   @unique
+  occupied    Boolean? @default(false)
   description String?
   userId      String?
-  user        User?            @relation("UserAssignedSlot")
+  user        User?    @relation("UserAssignedSlot")
 
   parkingRequests ParkingRequest[] @relation("SlotToParkingRequests") // 👈 add this
 
@@ -64,11 +70,33 @@ model Slot {
 model ParkingRequest {
   id        String   @id @default(uuid())
   userId    String
-  slotId    String?
-
+  vehicleId String
+  slotId    String?  // Assigned upon approval
   status    String
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
-  slot      Slot?    @relation("SlotToParkingRequests", fields: [slotId], references: [id]) // ✅ add relation name
+  entryTime DateTime @default(now())
+  exitTime  DateTime?
+
+  user    User    @relation(fields: [userId], references: [id])
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+  slot    Slot?   @relation("SlotToParkingRequests", fields: [slotId], references: [id])
+}
+
+
+
+model Vehicle {
+  id        String   @id @default(uuid())
+  plate     String   @unique
+  type      String
+  color     String?    
+  model     String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id])
+  requests ParkingRequest[]
+
+  @@map("vehicles")
 }

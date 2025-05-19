@@ -1,35 +1,37 @@
-import bodyParser from "body-parser";
-import cors from "cors";
-import { config } from "dotenv";
-import express from "express";
-import http from "http";
-import swaggerUi from "swagger-ui-express";
-import swaggerFile from "./swagger/doc/swagger.json";
-import ServerResponse from "./utils/ServerResponse";
-import router from "./routes";
+// import bodyParser from "body-parser";
+// import cors from "cors";
+// import { config } from "dotenv";
+// import express from "express";
+// import http from "http";
+// import swaggerUi from "swagger-ui-express";
+// import swaggerSpec from "./swagger";
+// // import swaggerUi from "swagger-ui-express";
+// // import swaggerFile from "./swagger/doc/swagger.json";
+// import ServerResponse from "./utils/ServerResponse";
+// import router from "./routes";
 
-config();
+// config();
 
-const app = express();
-const server = http.createServer(app);
-const PORT = process.env.PORT;
+// const app = express();
+// const server = http.createServer(app);
+// const PORT = process.env.PORT;
 
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({ origin: "*" }));
-app.disable("x-powered-by");
+// app.use(express.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(cors({ origin: "*" }));
+// app.disable("x-powered-by");
 
-// Swagger docs
-// app.use("/api/v1/docs", swaggerUi.serve as RequestHandler, swaggerUi.setup(swaggerFile));
+// // Swagger docs
+// // app.use("/api/v1/docs", swaggerUi.serve as RequestHandler, swaggerUi.setup(swaggerFile));
 
-// ✅ App routes (must come before catch-all)
-app.use("/api/v1", router);
+// // ✅ App routes (must come before catch-all)
+// app.use("/api/v1", router);
+// // /
+// // ❌ Catch-all goes last
+// app.use("*", (req, res) => {
+//     return ServerResponse.error(res, "Route not found");
+// });
 
-// ❌ Catch-all goes last
-app.use("*", (req, res) => {
-    return ServerResponse.error(res, "Route not found");
-});
-
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// server.listen(PORT, () => {
+//     console.log(`Server is running on port ${PORT}`);
+// });

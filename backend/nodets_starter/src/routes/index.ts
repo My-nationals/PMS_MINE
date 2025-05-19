@@ -5,6 +5,7 @@ import slotRouter from "./slot.routes"
 import requestRouter from "./request.route"
 import userDashboardRouter from "./userDashboard.route";
 import adminDashboardRouter from "./admin_dashboard.route";
+import vehicleRouter from "./vehicle.route";
 
 const router = Router()
 
@@ -63,6 +64,16 @@ router.use(
     adminDashboardRouter
     /*
         #swagger.tags = ['admin-dashboard']
+        #swagger.security = [{
+                "bearerAuth": []
+        }] 
+    */
+);
+router.use(
+    "/vehicles",
+    vehicleRouter
+    /*
+        #swagger.tags = ['Users']
         #swagger.security = [{
                 "bearerAuth": []
         }] 
